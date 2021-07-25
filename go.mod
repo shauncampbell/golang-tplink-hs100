@@ -1,6 +1,6 @@
-module github.com/jaedle/golang-tplink-hs100
+module github.com/shauncampbell/golang-tplink-hs100
 
-go 1.13
+go 1.16
 
 require (
 	github.com/onsi/ginkgo v1.14.2

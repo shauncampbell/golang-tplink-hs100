@@ -3,7 +3,7 @@ package crypto_test
 import (
 	b64 "encoding/base64"
 
-	"github.com/jaedle/golang-tplink-hs100/internal/crypto"
+	"github.com/shauncampbell/golang-tplink-hs100/internal/crypto"
 
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/ginkgo/extensions/table"

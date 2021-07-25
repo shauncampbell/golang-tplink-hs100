@@ -34,7 +34,7 @@ func (hs100 *Hs100) TurnOn() error {
 
 	r, err := parseSetRelayResponse(resp)
 	if err != nil {
-		return errors.Wrap(err, "Could not parse response from device")
+		return errors.Wrap(err, "Could not parse SystemInformationResponse from device")
 	} else if r.errorOccurred() {
 		return errors.New("got non zero exit code from device")
 	}
@@ -68,7 +68,7 @@ func (hs100 *Hs100) TurnOff() error {
 
 	r, err := parseSetRelayResponse(resp)
 	if err != nil {
-		return errors.Wrap(err, "Could not parse response from device")
+		return errors.Wrap(err, "Could not parse SystemInformationResponse from device")
 	} else if r.errorOccurred() {
 		return errors.New("got non zero exit code from device")
 	}
@@ -90,16 +90,34 @@ func (hs100 *Hs100) IsOn() (bool, error) {
 	return on, nil
 }
 
+func (hs100 *Hs100) GetInfo() (*SystemInformationResponse, error) {
+	resp, err := hs100.commandSender.SendCommand(hs100.Address, isOnCommand)
+	if err != nil {
+		return nil, err
+	}
+
+	var r SystemInformationResponse
+	err = json.Unmarshal([]byte(resp), &r)
+	return &r, err
+}
+
 func isOn(s string) (error, bool) {
-	var r response
+	var r SystemInformationResponse
 	err := json.Unmarshal([]byte(s), &r)
 	on := r.System.SystemInfo.RelayState == 1
 	return err, on
 }
 
-type response struct {
+type SystemInformationResponse struct {
 	System struct {
 		SystemInfo struct {
+			SoftwareVersion string `json:"sw_ver"`
+			HardwareVersion string `json:"hw_ver"`
+			Model string `json:"model"`
+			DeviceID string `json:"deviceId"`
+			OemID string `json:"oemId"`
+			HardwareID string `json:"hwId"`
+			MACAddress string `json:"mac"`
 			RelayState int    `json:"relay_state"`
 			Alias      string `json:"alias"`
 		} `json:"get_sysinfo"`
@@ -122,7 +140,7 @@ func (hs100 *Hs100) GetName() (string, error) {
 }
 
 func name(resp string) (error, string) {
-	var r response
+	var r SystemInformationResponse
 	err := json.Unmarshal([]byte(resp), &r)
 	name := r.System.SystemInfo.Alias
 	return err, name
@@ -146,7 +164,7 @@ func powerConsumption(resp string) (PowerConsumption, error) {
 	var r powerConsumptionResponse
 	err := json.Unmarshal([]byte(resp), &r)
 	if err != nil {
-		return PowerConsumption{}, errors.Wrap(err, "Cannot parse response")
+		return PowerConsumption{}, errors.Wrap(err, "Cannot parse SystemInformationResponse")
 	} else {
 		return r.toPowerConsumption(), nil
 	}

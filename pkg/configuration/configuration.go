@@ -1,7 +1,7 @@
 package configuration
 
 import (
-	"github.com/jaedle/golang-tplink-hs100/internal/connector"
+	"github.com/shauncampbell/golang-tplink-hs100/internal/connector"
 	"time"
 )
 

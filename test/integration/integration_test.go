@@ -1,8 +1,8 @@
 package integration_test
 
 import (
-	"github.com/jaedle/golang-tplink-hs100/pkg/configuration"
-	"github.com/jaedle/golang-tplink-hs100/pkg/hs100"
+	"github.com/shauncampbell/golang-tplink-hs100/pkg/configuration"
+	"github.com/shauncampbell/golang-tplink-hs100/pkg/hs100"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 )

@@ -4,8 +4,8 @@ import (
 	"net"
 	"time"
 
-	"github.com/jaedle/golang-tplink-hs100/internal/connector"
-	"github.com/jaedle/golang-tplink-hs100/internal/crypto"
+	"github.com/shauncampbell/golang-tplink-hs100/internal/connector"
+	"github.com/shauncampbell/golang-tplink-hs100/internal/crypto"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 )

@@ -7,7 +7,7 @@ import (
 	"net"
 	"time"
 
-	"github.com/jaedle/golang-tplink-hs100/internal/crypto"
+	"github.com/shauncampbell/golang-tplink-hs100/internal/crypto"
 )
 
 const devicePort = ":9999"

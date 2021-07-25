@@ -2,7 +2,7 @@ package hs100_test
 
 import (
 	"errors"
-	"github.com/jaedle/golang-tplink-hs100/pkg/hs100"
+	"github.com/shauncampbell/golang-tplink-hs100/pkg/hs100"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 	"time"
@@ -46,7 +46,7 @@ var _ = Describe("Hs100", func() {
 			Expect(err).To(HaveOccurred())
 		})
 
-		It("fails if response is invalid", func() {
+		It("fails if SystemInformationResponse is invalid", func() {
 			s := &commandSender{
 				response: "[}",
 			}
@@ -91,7 +91,7 @@ var _ = Describe("Hs100", func() {
 			Expect(err).To(HaveOccurred())
 		})
 
-		It("fails if response is invalid", func() {
+		It("fails if SystemInformationResponse is invalid", func() {
 			s := &commandSender{
 				response: "[}",
 			}
@@ -132,7 +132,7 @@ var _ = Describe("Hs100", func() {
 			Expect(on).To(Equal(false))
 		})
 
-		It("fails on invalid response", func() {
+		It("fails on invalid SystemInformationResponse", func() {
 			s := &commandSender{
 				response: "{]",
 			}
@@ -169,7 +169,7 @@ var _ = Describe("Hs100", func() {
 			Expect(name).To(Equal(aDeviceName))
 		})
 
-		It("fails on invalid response", func() {
+		It("fails on invalid SystemInformationResponse", func() {
 			s := &commandSender{
 				response: "{]",
 			}
@@ -226,7 +226,7 @@ var _ = Describe("Hs100", func() {
 			Expect(powerConsumption).To(BeZero())
 		})
 
-		It("fails if response is invalid", func() {
+		It("fails if SystemInformationResponse is invalid", func() {
 			s := &commandSender{
 				response: "{]",
 			}
