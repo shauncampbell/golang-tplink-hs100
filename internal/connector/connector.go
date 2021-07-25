@@ -1,3 +1,4 @@
+// Package connector provides utilities for connecting and interfacing with an hs1xx device.
 package connector
 
 import (
@@ -13,19 +14,23 @@ import (
 const devicePort = ":9999"
 const headerLength = 4
 
-func SendCommand(address string, command string, timeout time.Duration) (string, error) {
+// SendCommand sends a command to the specified hs1xx device. The device will wait for the specified timeout for a response.
+func SendCommand(address, command string, timeout time.Duration) (string, error) {
 	conn, err := net.DialTimeout("tcp", address+devicePort, timeout)
 	if err != nil {
 		return "", err
 	}
-	defer conn.Close()
+	defer func() { _ = conn.Close() }()
 
 	writer := bufio.NewWriter(conn)
 	_, err = writer.Write(crypto.EncryptWithHeader(command))
 	if err != nil {
 		return "", err
 	}
-	writer.Flush()
+	err = writer.Flush()
+	if err != nil {
+		return "", err
+	}
 
 	response, err := readHeader(conn)
 	if err != nil {

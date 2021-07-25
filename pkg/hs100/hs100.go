@@ -1,7 +1,10 @@
+// Package hs100 is a public facing package for communicating with hs1xx devices.
 package hs100
 
 import (
 	"encoding/json"
+	"fmt"
+
 	"github.com/pkg/errors"
 )
 
@@ -10,11 +13,13 @@ const turnOffCommand = `{"system":{"set_relay_state":{"state":0}}}`
 const isOnCommand = `{"system":{"get_sysinfo":{}}}`
 const currentPowerConsumptionCommand = `{"emeter":{"get_realtime":{},"get_vgain_igain":{}}}`
 
+// Hs100 is a struct representing a particular hs1xx device.
 type Hs100 struct {
 	Address       string
 	commandSender CommandSender
 }
 
+// NewHs100 creates a new Hs100 object.
 func NewHs100(address string, s CommandSender) *Hs100 {
 	return &Hs100{
 		Address:       address,
@@ -22,10 +27,12 @@ func NewHs100(address string, s CommandSender) *Hs100 {
 	}
 }
 
+// CommandSender is an interface which sends commands to a specific hs1xx device at the specified address.
 type CommandSender interface {
 	SendCommand(address string, command string) (string, error)
 }
 
+// TurnOn turns on the hs1xx device.
 func (hs100 *Hs100) TurnOn() error {
 	resp, err := hs100.commandSender.SendCommand(hs100.Address, turnOnCommand)
 	if err != nil {
@@ -42,6 +49,14 @@ func (hs100 *Hs100) TurnOn() error {
 	return nil
 }
 
+type setRelayResponse struct {
+	System struct {
+		SetRelayState struct {
+			ErrorCode int `json:"err_code"`
+		} `json:"set_relay_state"`
+	} `json:"system"`
+}
+
 func parseSetRelayResponse(response string) (setRelayResponse, error) {
 	var result setRelayResponse
 	err := json.Unmarshal([]byte(response), &result)
@@ -52,14 +67,7 @@ func (r *setRelayResponse) errorOccurred() bool {
 	return r.System.SetRelayState.ErrorCode != 0
 }
 
-type setRelayResponse struct {
-	System struct {
-		SetRelayState struct {
-			ErrorCode int `json:"err_code"`
-		} `json:"set_relay_state"`
-	} `json:"system"`
-}
-
+// TurnOff turns off an hs1xx device
 func (hs100 *Hs100) TurnOff() error {
 	resp, err := hs100.commandSender.SendCommand(hs100.Address, turnOffCommand)
 	if err != nil {
@@ -76,13 +84,14 @@ func (hs100 *Hs100) TurnOff() error {
 	return nil
 }
 
+// IsOn checks if an hs1xx device is on.
 func (hs100 *Hs100) IsOn() (bool, error) {
 	resp, err := hs100.commandSender.SendCommand(hs100.Address, isOnCommand)
 	if err != nil {
 		return false, err
 	}
 
-	err, on := isOn(resp)
+	on, err := isOn(resp)
 	if err != nil {
 		return false, err
 	}
@@ -90,40 +99,44 @@ func (hs100 *Hs100) IsOn() (bool, error) {
 	return on, nil
 }
 
+// SystemInformationResponse contains information about the hs1xx device.
+type SystemInformationResponse struct {
+	System struct {
+		SystemInfo struct {
+			SoftwareVersion string `json:"sw_ver"`
+			HardwareVersion string `json:"hw_ver"`
+			Model           string `json:"model"`
+			DeviceID        string `json:"deviceId"`
+			OemID           string `json:"oemId"`
+			HardwareID      string `json:"hwId"`
+			MACAddress      string `json:"mac"`
+			RelayState      int    `json:"relay_state"`
+			Alias           string `json:"alias"`
+		} `json:"get_sysinfo"`
+	} `json:"system"`
+}
+
+// GetInfo gets information about the device.
 func (hs100 *Hs100) GetInfo() (*SystemInformationResponse, error) {
 	resp, err := hs100.commandSender.SendCommand(hs100.Address, isOnCommand)
 	if err != nil {
 		return nil, err
 	}
 
+	fmt.Println(resp)
 	var r SystemInformationResponse
 	err = json.Unmarshal([]byte(resp), &r)
 	return &r, err
 }
 
-func isOn(s string) (error, bool) {
+func isOn(s string) (bool, error) {
 	var r SystemInformationResponse
 	err := json.Unmarshal([]byte(s), &r)
 	on := r.System.SystemInfo.RelayState == 1
-	return err, on
+	return on, err
 }
 
-type SystemInformationResponse struct {
-	System struct {
-		SystemInfo struct {
-			SoftwareVersion string `json:"sw_ver"`
-			HardwareVersion string `json:"hw_ver"`
-			Model string `json:"model"`
-			DeviceID string `json:"deviceId"`
-			OemID string `json:"oemId"`
-			HardwareID string `json:"hwId"`
-			MACAddress string `json:"mac"`
-			RelayState int    `json:"relay_state"`
-			Alias      string `json:"alias"`
-		} `json:"get_sysinfo"`
-	} `json:"system"`
-}
-
+// GetName returns the alias of the device.
 func (hs100 *Hs100) GetName() (string, error) {
 	resp, err := hs100.commandSender.SendCommand(hs100.Address, isOnCommand)
 
@@ -131,7 +144,7 @@ func (hs100 *Hs100) GetName() (string, error) {
 		return "", err
 	}
 
-	err, name := name(resp)
+	name, err := name(resp)
 	if err != nil {
 		return "", err
 	}
@@ -139,13 +152,14 @@ func (hs100 *Hs100) GetName() (string, error) {
 	return name, nil
 }
 
-func name(resp string) (error, string) {
+func name(resp string) (string, error) {
 	var r SystemInformationResponse
 	err := json.Unmarshal([]byte(resp), &r)
 	name := r.System.SystemInfo.Alias
-	return err, name
+	return name, err
 }
 
+// GetCurrentPowerConsumption returns the current power consumption available for the device.
 func (hs100 *Hs100) GetCurrentPowerConsumption() (PowerConsumption, error) {
 	resp, err := hs100.commandSender.SendCommand(hs100.Address, currentPowerConsumptionCommand)
 	if err != nil {
@@ -154,6 +168,7 @@ func (hs100 *Hs100) GetCurrentPowerConsumption() (PowerConsumption, error) {
 	return powerConsumption(resp)
 }
 
+// PowerConsumption includes the current power consumption for the device.
 type PowerConsumption struct {
 	Current float32
 	Voltage float32
@@ -165,14 +180,19 @@ func powerConsumption(resp string) (PowerConsumption, error) {
 	err := json.Unmarshal([]byte(resp), &r)
 	if err != nil {
 		return PowerConsumption{}, errors.Wrap(err, "Cannot parse SystemInformationResponse")
-	} else {
-		return r.toPowerConsumption(), nil
 	}
+
+	if r.Emeter.ErrorCode != 0 && r.Emeter.ErrorMessage != "" {
+		return PowerConsumption{}, fmt.Errorf("error %d: %s", r.Emeter.ErrorCode, r.Emeter.ErrorMessage)
+	}
+	return r.toPowerConsumption(), nil
 }
 
 type powerConsumptionResponse struct {
 	Emeter struct {
-		RealTime struct {
+		ErrorCode    int    `json:"err_code"`
+		ErrorMessage string `json:"err_msg"`
+		RealTime     struct {
 			Current float32 `json:"current"`
 			Voltage float32 `json:"voltage"`
 			Power   float32 `json:"power"`

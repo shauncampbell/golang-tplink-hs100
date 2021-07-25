@@ -2,9 +2,9 @@ package hs100_test
 
 import (
 	"errors"
-	"github.com/shauncampbell/golang-tplink-hs100/pkg/hs100"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
+	"github.com/shauncampbell/golang-tplink-hs100/pkg/hs100"
 	"time"
 )
 
@@ -285,13 +285,13 @@ var _ = Describe("Hs100", func() {
 
 		It("discovers in parallel", func() {
 			start := time.Now()
-			duration := 10*time.Millisecond
+			duration := 10 * time.Millisecond
 			_, err := hs100.Discover("192.168.2.0/24", &commandSender{
 				response:      reponseWithName(aDeviceName),
 				responseDelay: &duration,
 			})
 			finished := time.Now()
-			maximum := start.Add(100*time.Millisecond)
+			maximum := start.Add(100 * time.Millisecond)
 
 			Expect(err).NotTo(HaveOccurred())
 			Expect(finished.Before(maximum)).To(Equal(true))
@@ -432,13 +432,13 @@ func assertOneCommandSend(s *commandSender, address string, command string) {
 }
 
 type commandSender struct {
-	calls    int
-	address  string
-	command  string
-	response string
-	error    bool
+	calls            int
+	address          string
+	command          string
+	response         string
+	error            bool
 	allowedAddresses *[]string
-	responseDelay *time.Duration
+	responseDelay    *time.Duration
 }
 
 func (c *commandSender) SendCommand(addr string, cmd string) (string, error) {

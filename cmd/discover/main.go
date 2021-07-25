@@ -1,10 +1,11 @@
 package main
 
 import (
-	"github.com/shauncampbell/golang-tplink-hs100/pkg/configuration"
-	"github.com/shauncampbell/golang-tplink-hs100/pkg/hs100"
 	"log"
 	"time"
+
+	"github.com/shauncampbell/golang-tplink-hs100/pkg/configuration"
+	"github.com/shauncampbell/golang-tplink-hs100/pkg/hs100"
 )
 
 func main() {

@@ -4,10 +4,10 @@ import (
 	"net"
 	"time"
 
-	"github.com/shauncampbell/golang-tplink-hs100/internal/connector"
-	"github.com/shauncampbell/golang-tplink-hs100/internal/crypto"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
+	"github.com/shauncampbell/golang-tplink-hs100/internal/connector"
+	"github.com/shauncampbell/golang-tplink-hs100/internal/crypto"
 )
 
 var _ = Describe("Connector", func() {
@@ -19,7 +19,7 @@ var _ = Describe("Connector", func() {
 
 	It("sends command", func() {
 		l := startServer()
-		defer l.Close()
+		defer func() { _ = l.Close() }()
 		request := make(chan []byte)
 		go handleRequest(l, request, crypto.EncryptWithHeader(aResponse))
 
@@ -32,7 +32,7 @@ var _ = Describe("Connector", func() {
 
 	It("sends command and receives response", func() {
 		l := startServer()
-		defer l.Close()
+		defer func() { _ = l.Close() }()
 		request := make(chan []byte)
 		go handleRequest(l, request, crypto.EncryptWithHeader(aResponse))
 
