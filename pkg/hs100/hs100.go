@@ -123,7 +123,6 @@ func (hs100 *Hs100) GetInfo() (*SystemInformationResponse, error) {
 		return nil, err
 	}
 
-	fmt.Println(resp)
 	var r SystemInformationResponse
 	err = json.Unmarshal([]byte(resp), &r)
 	return &r, err
